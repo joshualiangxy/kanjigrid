@@ -20,7 +20,7 @@ from aqt.webview import AnkiWebView
 from aqt.qt import (Qt, QAction, QStandardPaths,
                     QImage, QPainter, QSize, QEvent, QSizePolicy,
                     QFileDialog, QDialog, QHBoxLayout, QVBoxLayout, QGroupBox,
-                    QLineEdit, QLabel, QCheckBox, QSpinBox, QComboBox, QPushButton)
+                    QLineEdit, QLabel, QCheckBox, QSpinBox, QComboBox, QPushButton, QColor)
 
 from . import data
 
@@ -31,13 +31,13 @@ from . import data
 _css = "body { background: #ccc url(/img/noise.png); }" + \
     ".info-wrapper { height: auto; width: 500px; margin: 4em auto; padding: 0 0 2em 0; position: relative; }" + \
     ".info { max-height: 120px; height: auto; padding: .5em 0; border-bottom: solid 1px #fff; border-radius: 0 0 1em 1em;" + \
-    "	overflow: hidden; position: relative; transition: 1s; } p { margin: 1em; }" + \
+    "    overflow: hidden; position: relative; transition: 1s; } p { margin: 1em; }" + \
     ".info:after, .aftershadow { bottom: 0; width: 100%; height: 3em; border-radius: 0 0 1em 1em; position: absolute;" + \
-    "	background: linear-gradient(rgba(192,192,192,0), #ccc); content: ''; }" + \
+    "    background: linear-gradient(rgba(192,192,192,0), #ccc); content: ''; }" + \
     ".aftershadow { filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#00cccccc, endColorstr=#ffcccccc); }" + \
     ".info-wrapper input[type=checkbox] { display: none; } .info-wrapper label { left: 50%; bottom: 1.5em; width: 9em;" + \
-    "	height: 1.25em; margin:  0 0 0 -4.5em; border-bottom: solid 1px #fff; border-radius: 0 0 1em 1em; overflow: hidden;" + \
-    "	position: absolute; font: 700 .67em/1.25em Arial; text-align: center; text-shadow: 0 1px 0 #fff; cursor: pointer; }" + \
+    "    height: 1.25em; margin:  0 0 0 -4.5em; border-bottom: solid 1px #fff; border-radius: 0 0 1em 1em; overflow: hidden;" + \
+    "    position: absolute; font: 700 .67em/1.25em Arial; text-align: center; text-shadow: 0 1px 0 #fff; cursor: pointer; }" + \
     ".info-wrapper label .more { margin: -.1em 0 .35em; transition: 1s; } .info-wrapper .switch { width: 4em; display: inline-block; }" + \
     ".info-wrapper input[type=checkbox]:checked ~ .info { max-height: 15em; } .info-wrapper input[type=checkbox]:checked + label .more { margin-top: -1.65em; }"
 
@@ -111,11 +111,11 @@ class KanjiGridWebView(AnkiWebView):
         super().__init__()
         # Saved images are empty if the background is transparent; AnkiWebView
         # sets bg color to transparent by default
-        self._page.setBackgroundColor(Qt.white)
+        self._page.setBackgroundColor(QColor('white'))
         self.save_png = ()
 
     def eventFilter(self, obj, evt):
-        if not(evt.type() == QEvent.Paint and self.save_png):
+        if not (evt.type() == QEvent.Type.Paint and self.save_png):
             return super().eventFilter(obj, evt)
 
         filename, oldsize = self.save_png
@@ -203,7 +203,7 @@ class KanjiGrid:
         self.html += "<span style=\"font-size: 3em;color: #888;\">Kanji Grid - %s</span><br>\n" % deckname
         self.html += "<div style=\"margin-bottom: 24pt;padding: 20pt;\"><p style=\"float: left\">Key:</p>"
         self.html += "<p style=\"float: right\">Weak&nbsp;"
-	# keycolors = (hsvrgbstr(n/6.0) for n in range(6+1))
+        # keycolors = (hsvrgbstr(n/6.0) for n in range(6+1))
         for c in [n/6.0 for n in range(6+1)]:
             self.html += "<span class=\"key\" style=\"background-color: %s;\">&nbsp;</span>" % hsvrgbstr(c/2)
         self.html += "&nbsp;Strong</p></div>\n"
@@ -299,7 +299,7 @@ class KanjiGrid:
         return 0
 
     def savehtml(self, config):
-        fileName = QFileDialog.getSaveFileName(self.win, "Save Page", QStandardPaths.standardLocations(QStandardPaths.DesktopLocation)[0], "Web Page (*.html *.htm)")[0]
+        fileName = QFileDialog.getSaveFileName(self.win, "Save Page", QStandardPaths.standardLocations(QStandardPaths.StandardLocation.DesktopLocation)[0], "Web Page (*.html *.htm)")[0]
         if fileName != "":
             mw.progress.start(immediate=True)
             if ".htm" not in fileName:
@@ -312,7 +312,7 @@ class KanjiGrid:
             showInfo("Page saved to %s!" % os.path.abspath(fileOut.name))
 
     def savepng(self):
-        fileName = QFileDialog.getSaveFileName(self.win, "Save Page", QStandardPaths.standardLocations(QStandardPaths.DesktopLocation)[0], "Portable Network Graphics (*.png)")[0]
+        fileName = QFileDialog.getSaveFileName(self.win, "Save Page", QStandardPaths.standardLocations(QStandardPaths.StandardLocation.DesktopLocation)[0], "Portable Network Graphics (*.png)")[0]
         if fileName != "":
             mw.progress.start(immediate=True)
             if ".png" not in fileName:
@@ -375,7 +375,7 @@ class KanjiGrid:
         fl = QHBoxLayout()
         deckcb = QComboBox()
         deckcb.addItems(sorted(mw.col.decks.allNames()))
-        deckcb.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        deckcb.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         fl.addWidget(QLabel("Deck: "))
         deckcb.setCurrentText(mw.col.decks.get(config.did)['name'])
         def change_did(deckname):
@@ -442,7 +442,7 @@ class KanjiGrid:
         swin.setTabOrder(groupby, shnew)
         swin.setTabOrder(shnew, toolt)
         swin.resize(500, 400)
-        if swin.exec_():
+        if swin.exec():
             mw.progress.start(immediate=True)
             if len(field.text().strip()) != 0:
                 config.pattern = field.text().lower()
