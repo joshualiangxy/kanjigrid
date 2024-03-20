@@ -122,7 +122,7 @@ class KanjiGridWebView(AnkiWebView):
         self.save_png = ()
 
         size = self._page.contentsSize().toSize()
-        image = QImage(size, QImage.Format_ARGB32)
+        image = QImage(size, QImage.Format.Format_ARGB32)
         painter = QPainter(image)
         self.render(painter)
         painter.end()
